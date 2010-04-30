@@ -11,13 +11,19 @@ body {
     color: red;
 }
 
-.game_screen, .word_input, .game_start, .game_stop {
+.game_screen, .word_input {
     display: none;
 }
 
-.users_pane, .chat_pane, .game_pane, .players_pane {
+.users_pane, .chat_pane, .game_pane {
     float: left;
     margin-right: 30px;
+}
+
+.game_pane {
+    border: 2px solid green;
+    width: 500px;
+    height: 90%;
 }
 
 table.users {
@@ -97,4 +103,11 @@ span.points {
     width: 100%;
     text-align: center;
     padding-top: 20px;
+}
+
+.game_pane {
+    position: relative;
+}
+.cog {
+    position: absolute;
 }

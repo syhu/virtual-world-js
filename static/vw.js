@@ -42,39 +42,17 @@ Array.prototype.grep = function(f) {
         users: [],
         players: [],
         game: {
-            is_playing: false,
-            dice_roll: [],
-            words: [],
-            played: {}
+            x: 0,
+            y: 0
         }
     },
     user_info: {},
-    letter_lookup: {},
-    neighbors: {},
     chat_focus: false,
 
     init: function() {
         this.startLongPoll();
         this.showSigninScreen();
         this.addEventHandlers();
-        this.setNeighbors();
-    },
-
-    setNeighbors: function() {
-        var neighbors = this.neighbors;
-        var offsets = [ [-1,-1], [-1,0], [-1,1], [0,-1], [0,1], [1,-1], [1,0], [1,1] ];
-        for (var i = 0; i < 16; i++) {
-            var row = parseInt(i / 4);
-            var col = i % 4;
-            neighbors[i] = {};
-            for (var o = 0; o < 8; o++) {
-                var nrow = row + offsets[o][0];
-                var ncol = col + offsets[o][1];
-                if (nrow >= 0 && nrow <= 3 && ncol >= 0 && ncol <= 3) {
-                    neighbors[i][nrow * 4 + ncol] = true;
-                }
-            }
-        }
     },
 
     showSigninScreen: function() {
@@ -157,19 +135,6 @@ Array.prototype.grep = function(f) {
                 return false;
             });
 
-        $('.game_start input')
-            .click(function() {
-                self.postEvent({event: 'start_game'});
-                self.rollDice();
-                return false;
-            });
-
-        $('.game_stop input')
-            .click(function() {
-                self.postEvent({event: 'stop_game'});
-                return false;
-            });
-
         $('.chat_input input').blur(function() {
             self.chat_focus = false;
         })
@@ -206,19 +171,8 @@ Array.prototype.grep = function(f) {
         this.user_info[user_id] = {};
        
         var img_html = this.genImageHtml(user_email, user_id);
-        $('table.users')
-            .append('<tr><td>' + img_html + '</td></tr>')
-            .find('tr:last')
-            .each(function() {
-                if (! self.isMasterUser()) return;
-                $(this).click(function() {
-                    if (self.state.game.is_playing) return;
-                    self.postEvent({
-                        event: 'add_player',
-                        player_id: user_id
-                    });
-                });
-            })
+        $('.game_pane')
+            .append('<div class="cog">' + img_html + '</div>')
     },
 
     removeUser: function(user_id) {
@@ -267,6 +221,7 @@ Array.prototype.grep = function(f) {
         }
     },
 
+    // TODO Remove player from game board
     removePlayer: function(user_id) {
         var user = this.getUser(user_id);
         if (!(user && user.is_player)) return;
@@ -277,10 +232,6 @@ Array.prototype.grep = function(f) {
             .remove();
         this.state.players.splice((col - 1), 1);
         delete this.user_info[user_id].player_td;
-
-        if( this.state.players.length < 2 ) {
-            $('.game_start').hide();
-        }
     },
 
     getUser: function(user_id) {
@@ -297,87 +248,6 @@ Array.prototype.grep = function(f) {
             }
         }
         return null;
-    },
-
-    getDice: function() {
-        return [
-            ['A', 'A', 'C', 'I', 'O', 'T'],
-            ['A', 'B', 'I', 'L', 'T', 'Y'],
-            ['A', 'B', 'J', 'M', 'O', 'Y'], //'Qu'],
-            ['A', 'C', 'D', 'E', 'M', 'P'],
-            ['A', 'C', 'E', 'L', 'R', 'S'],
-            ['A', 'D', 'E', 'N', 'V', 'Z'],
-            ['A', 'H', 'M', 'O', 'R', 'S'],
-            ['B', 'F', 'I', 'O', 'R', 'X'],
-            ['D', 'E', 'N', 'S', 'O', 'W'],
-            ['D', 'K', 'N', 'O', 'U', 'T'],
-            ['E', 'E', 'F', 'H', 'I', 'Y'],
-            ['E', 'G', 'I', 'N', 'T', 'V'],
-            ['E', 'G', 'K', 'L', 'U', 'Y'],
-            ['E', 'H', 'I', 'N', 'P', 'S'],
-            ['E', 'L', 'P', 'S', 'T', 'U'],
-            ['G', 'I', 'L', 'R', 'U', 'W']
-        ];
-    },
-
-    rollDice: function() {
-        dice = this.getDice();
-        roll = [];
-        for (var i = 16; i > 0; i--) {
-            var ii = parseInt(Math.random() * i);
-            var die = dice.splice(ii, 1)[0];
-            var iii = parseInt(Math.random() * 6);
-            roll.push(die[iii]);
-        }
-        // roll = ['A', 'B', 'C', 'D','A', 'B', 'C', 'D','A', 'B', 'C', 'D', 'A', 'B', 'C', 'D'];
-        this.postEvent({
-            event: 'dice_roll',
-            'roll': $.toJSON(roll)
-        });
-    },
-
-    insertDice: function(roll) {
-        var $slots = $('table.game_board td');
-        for (var i = 0, l = roll.length; i < l; i++) {
-            $slots[i].textContent = roll[i];
-        }
-
-        for (var i = 0 ; i < 16; i++) {
-            var letter = roll[i];
-            if (! this.letter_lookup[letter]) {
-                this.letter_lookup[letter] = [];
-            }
-            this.letter_lookup[letter].push(i);
-        }
-    },
-
-    checkWord: function(word) {
-        var paths = [[]];
-        var lookup = this.letter_lookup;
-        var neighbors = this.neighbors;
-        for (var i = 0, l = word.length; i < l; i++) {
-            var letter = word[i];
-            if (! lookup[letter]) return false;
-            var nums = lookup[letter];
-            
-            var paths2 = [];
-            for (var ii = 0, ll = nums.length; ii < ll; ii++) {
-                var p = function() {
-                    if (i == 0 || (
-                        neighbors[this[i - 1]][nums[ii]] &&
-                        !(this.grep(function() { return(this == nums[ii]) }).length)
-                    )) {
-                        return this.concat(nums[ii]);
-                    }
-                }
-                var a = paths.map(p);
-                paths2 = paths2.concat(a);
-            }
-            paths = paths2;
-            if (! paths.length) return false;
-        }
-        // XXX(paths);
-        return paths[0];
     },
 
 // Server communication
@@ -431,9 +301,6 @@ Array.prototype.grep = function(f) {
         for (var i = 0, l = state.players.length; i < l; i++) {
             this.addPlayer(state.players[i]);
         }
-        if (state.game.dice_roll.length) {
-            this.insertDice(state.game.dice_roll);
-        }
         this.is_setup = true;
         this.postEvent({event: 'add_user'});
     },
@@ -441,6 +308,7 @@ Array.prototype.grep = function(f) {
 
     handle_chat_msg: function(event) {
         var user = this.getUser(event.user_id); 
+        if (! user) return;
         var email = user.user_email;
         var id = user.user_id;
         var html = this.genImageHtml(email, id) +
@@ -490,62 +358,6 @@ Array.prototype.grep = function(f) {
         this.startKeyPress();
 
         this.state.game.is_playing = true;
-    },
-
-    handle_stop_game: function(event) {
-        this.state.game.is_playing = false;
-        this.stopKeyPress();
-        this.letter_lookup = {};
-
-        if (this.isMasterUser())
-            $('.game_start').show();
-        $('.game_stop').hide();
-        $('.word_input').hide();
-    },
-
-    handle_dice_roll: function(event) {
-        var roll = this.state.game.dice_roll = $.evalJSON(event.roll);
-        this.insertDice(roll);
-    },
-
-    handle_add_word: function(event) {
-        var word = event.word;
-        this.state.game.played[word] = true;
-        var user = this.getUser(event.user_id);
-        var col = user.player_num;
-        var $table = $('table.players');
-        var $last_row = $table.find('tr:last');
-        var $td = $last_row.find('td:eq(' + (col - 1) + ')');
-        if ($td.html() != "") {
-            var a = [];
-            $last_row
-                .find('td')
-                .each(function() { a.push(this) });
-            
-            var html = '<tr>' +
-                    a.map(function() {return '<td></td>'})
-                    .join('') +
-                    '</tr>';
-            $table.append(html)
-        }
-        var points = (({3:1, 4:1, 5:2, 6:3, 7:5})[word.length] || 11);
-        try {
-            $table.find('tr').find('td:eq(' + (col - 1) + ')')
-                .each(function() {
-                    if ($(this).html() == "") {
-                        $(this).html(
-                            '<span class="word">' + word +
-                            '</span><span class="points">' + 
-                            points +
-                            '</span>'
-                        );
-                        throw("word inserted. see ya");
-                    }
-                })
-        }
-        catch(e) {}
-        var $total_td = $table.find('tr:first').find('td:eq(' + (col - 1) + ')');
-        $total_td.text(parseInt($total_td.text()) + points);
     },
 
     startKeyPress: function() {
@@ -626,17 +438,6 @@ Array.prototype.grep = function(f) {
             }
             return false;
         };
-    },
-
-    stopKeyPress: function() {
-        document.onkeypress = function(e) { return true };
-    },
-
-    flashInput: function() {
-        $('form.word_input input').css('background-color', 'red');
-        setTimeout(function() {
-            $('form.word_input input').css('background-color', 'white');
-        }, 200);
     },
 
     'The': 'End'
