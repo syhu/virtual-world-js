@@ -1,0 +1,22 @@
+vw - a simple sample virtual world
+
+SETUP
+=====
+
+To run it, you'll need to install http://github.com/miyagawa/Tatsumaki.
+
+    sudo cpan Tatsumaki
+
+is the best way to do that. Then run:
+
+    ./vw
+
+from this directory, and your vw server will be running. Get multiple
+people to go to the URL, and have fun!
+
+COPYRIGHT
+=========
+
+Copyright (c) 2010 Shun-Yun Hu <syhu@yahoo.com>, Ingy döt Net <ingy@ingy.net>
+Licensed under the MIT License.
+See the License file.

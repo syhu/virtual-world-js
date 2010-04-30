@@ -1,0 +1,100 @@
+body {
+    margin: 1em 2em;
+    font-family: sans-serif;
+}
+
+.canvas {
+    min-width: 1000px;
+}
+
+.signin_error {
+    color: red;
+}
+
+.game_screen, .word_input, .game_start, .game_stop {
+    display: none;
+}
+
+.users_pane, .chat_pane, .game_pane, .players_pane {
+    float: left;
+    margin-right: 30px;
+}
+
+table.users {
+    width: 30px;
+}
+
+table.users td {
+    width: 30px;
+}
+
+table.users td img {
+    width: 40px;
+}
+
+.chat_messages {
+    width: 250px;
+    background-color: #ffe;
+    overflow: auto;
+}
+
+.chat_messages img {
+    vertical-align: middle;
+    width: 25px;
+    border: 1px solid white;
+}
+
+.chat_input input {
+    width: 250px;
+}
+
+.word_input input {
+    font-size: 200%;
+    width: 200px;
+}
+
+table.game_board {
+    border-collapse:collapse;
+}
+
+table.game_board td {
+    border: solid black 2px;
+    font-family: courier;
+    font-size: 300%;
+    text-align: center;
+}
+
+.players_pane {
+    float: left;
+}
+
+table.players {
+    border-collapse:collapse;
+}
+
+table.players td {
+    width: 50px;
+    padding: 1px 3px 0px 3px;
+}
+
+span.word {
+    float: left;
+    font-size: 60%;
+}
+
+span.points {
+    float: right;
+    font-size: 60%;
+}
+
+.total_score {
+    font-weight: bold;
+    text-align: center;
+}
+
+.footer {
+    clear: both;
+    width: 100%;
+    text-align: center;
+    padding-top: 20px;
+}

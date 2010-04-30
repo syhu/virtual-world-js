@@ -1,0 +1,59 @@
+% my $room = $_[0]->{handler}->args->[0];
+<html>
+<head>
+<title>Virtual World</title>
+
+<script src="/static/jquery.js"></script>
+<script src="/static/jquery.ev.js"></script>
+<script src="/static/jquery.md5.js"></script>
+<script src="/static/jquery.json.js"></script>
+<script src="/static/vw.js"></script>
+<script>
+    jQuery(function(){
+        var vw = new VW();
+        vw.room = "<%= $room %>";
+        V = vw;
+        vw.init();
+    });
+</script>
+
+<link rel="stylesheet" href="/static/vw.css" />
+</head>
+
+<body>
+<div class="canvas">
+    <div class="signin_screen">
+        <h1>Welcome to Virtual World -- Sign in to play:</h1>
+        Enter your email address:
+        <form name="signin" class="signin">
+            <input name="user_email" class="user_email" type="text" size="24" />
+        </form>
+        It is best to use an email address that has a <a
+            href="www.gravatar.com">Gravatar</a>.
+        <div class="signin_error"></div>
+    </div>
+
+    <div class="game_screen">
+
+        <div class="users_pane">
+            <table class="users">
+            </table>
+        </div>
+
+       <div class="chat_pane">
+             <form class="chat_input">
+                <input type="text" maxlength="150" size="50" />
+            </form>
+
+            <div class="chat_messages"></div>
+        </div>
+
+        <div class="game_pane">
+        </div>
+
+    </div>
+</div>
+
+<div class="footer">Powered by <a href="http://github.com/miyagawa/Tatsumaki">Tatsumaki</a>.</div>
+</body>
+</html>
